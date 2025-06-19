@@ -1,102 +1,107 @@
 <template>
   <q-layout view="lHh Lpr lFf">
-    <q-header elevated>
-      <q-toolbar>
-        <q-btn
-          flat
-          dense
-          round
-          icon="menu"
-          aria-label="Menu"
-          @click="toggleLeftDrawer"
-        />
-
-        <q-toolbar-title>
-          Quasar App
-        </q-toolbar-title>
-
-        <div>Quasar v{{ $q.version }}</div>
+    <q-header>
+      <q-toolbar class="main-toolbar">
+        <div class="flex items-center space-x-5 lg:space-x-10 flex-1">
+          <router-link to="/">
+            <q-img src="/logo.png" fit="contain" :height="`${$q.screen.lt.sm ? '60px' : '70px'}`"
+              :width="`${$q.screen.lt.sm ? '120px' : '160px'}`" />
+          </router-link>
+          <q-list v-if="!$q.screen.lt.sm" class="main-menu">
+            <q-item clickable :to="{ name: 'ProposalPage' }">
+              <q-item-section>
+                <q-item-label>Proposals</q-item-label>
+              </q-item-section>
+            </q-item>
+            <q-item clickable :to="{ name: 'PledgeRecord' }">
+              <q-item-section>
+                <q-item-label>Record</q-item-label>
+              </q-item-section>
+            </q-item>
+          </q-list>
+        </div>
+        <ConnectWallet ref="connectWalletRef" :is-w-full="false" btn-type="account" />
       </q-toolbar>
     </q-header>
-
-    <q-drawer
-      v-model="leftDrawerOpen"
-      show-if-above
-      bordered
-    >
-      <q-list>
-        <q-item-label
-          header
-        >
-          Essential Links
-        </q-item-label>
-
-        <EssentialLink
-          v-for="link in linksList"
-          :key="link.title"
-          v-bind="link"
-        />
-      </q-list>
-    </q-drawer>
-
     <q-page-container>
       <router-view />
     </q-page-container>
+    <q-footer class="px-3 py-2 shadow-lg shadow-blue-100" v-if="$q.screen.lt.sm">
+      <q-list dense class="main-menu">
+        <q-item class="flex-col items-center justify-center" clickable :to="{ name: 'ProposalPage' }">
+          <q-item-section class="!min-w-[auto] !pr-0 mb-1" avatar>
+            <q-icon name="home"></q-icon>
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>Proposals</q-item-label>
+          </q-item-section>
+        </q-item>
+        <q-item class="flex-col items-center justify-center" clickable :to="{ name: 'PledgeRecord' }">
+          <q-item-section class="!min-w-[auto] !pr-0 mb-1" avatar>
+            <q-icon name="list"></q-icon>
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>Record</q-item-label>
+          </q-item-section>
+        </q-item>
+        <q-item class="flex-col items-center justify-center" clickable :to="{ name: 'SocialPage' }">
+          <q-item-section class="!min-w-[auto] !pr-0 mb-1" avatar>
+            <q-icon name="account_tree"></q-icon>
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>Social</q-item-label>
+          </q-item-section>
+        </q-item>
+      </q-list>
+    </q-footer>
+    <q-footer v-else class="bg-transparent p-3">
+      <div class="container">
+        <div class="flex items-center justify-center">
+          <q-btn href="https://github.com/26dos" target="_blank" flat icon="fa-brands fa-github" color="black" />
+        </div>
+      </div>
+    </q-footer>
+    <q-dialog v-model="dAppStore.fullLoading" persistent>
+      <q-card class="w-[380px]" flat>
+        <div class="bg-primary p-5 flex flex-col items-center justify-center">
+          <q-img src="logo.png" width="200px" fit="contain" height="100px"></q-img>
+        </div>
+        <q-card-section class="flex flex-col items-center justify-center p-10">
+          <q-spinner-hourglass color="primary" size="4em" />
+          <h5 class="text-center font-bold text-xl mt-5">{{ dAppStore.fullLoadingText }}</h5>
+        </q-card-section>
+      </q-card>
+    </q-dialog>
   </q-layout>
 </template>
 
-<script setup>
-import { ref } from 'vue'
-import EssentialLink from 'components/EssentialLink.vue'
-
-const linksList = [
-  {
-    title: 'Docs',
-    caption: 'quasar.dev',
-    icon: 'school',
-    link: 'https://quasar.dev'
+<script>
+import { useQuasar } from 'quasar';
+import ConnectWallet from 'src/components/ConnectWallet.vue';
+import { defineComponent, ref } from 'vue';
+import { useDAppStore } from 'src/stores/d-app';
+export default defineComponent({
+  components: {
+    ConnectWallet,
   },
-  {
-    title: 'Github',
-    caption: 'github.com/quasarframework',
-    icon: 'code',
-    link: 'https://github.com/quasarframework'
+  name: 'MainLayout',
+  setup: function () {
+    const $q = useQuasar()
+    const dAppStore = useDAppStore()
+    dAppStore.getUserInfo()
+    return {
+      $q: ref($q),
+      dAppStore,
+    }
   },
-  {
-    title: 'Discord Chat Channel',
-    caption: 'chat.quasar.dev',
-    icon: 'chat',
-    link: 'https://chat.quasar.dev'
-  },
-  {
-    title: 'Forum',
-    caption: 'forum.quasar.dev',
-    icon: 'record_voice_over',
-    link: 'https://forum.quasar.dev'
-  },
-  {
-    title: 'Twitter',
-    caption: '@quasarframework',
-    icon: 'rss_feed',
-    link: 'https://twitter.quasar.dev'
-  },
-  {
-    title: 'Facebook',
-    caption: '@QuasarFramework',
-    icon: 'public',
-    link: 'https://facebook.quasar.dev'
-  },
-  {
-    title: 'Quasar Awesome',
-    caption: 'Community Quasar projects',
-    icon: 'favorite',
-    link: 'https://awesome.quasar.dev'
+  watch: {
+    'dAppStore.openLogin': function (open) {
+      if (!open) return
+      this.$refs.connectWalletRef.login()
+      this.dAppStore.setOpenLogin(false, () => {
+        this.dAppStore.loginCallback()
+      })
+    }
   }
-]
-
-const leftDrawerOpen = ref(false)
-
-function toggleLeftDrawer () {
-  leftDrawerOpen.value = !leftDrawerOpen.value
-}
+})
 </script>
