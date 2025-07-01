@@ -38,7 +38,7 @@
           </template>
         </q-scroll-area>
       </q-card>
-      <proposal-comments :p_id="proposal.p_id" :proposal="proposal" />
+      <proposal-comments v-if="!hideComments" :p_id="proposal.p_id" :proposal="proposal" />
     </div>
     <q-card class="main-card col-span-3">
       <q-card-section class="proposal-timeline">
@@ -68,6 +68,10 @@ export default defineComponent({
       default: () => ({
         status: 'draft'
       })
+    },
+    hideComments: {
+      type: Boolean,
+      default: false
     }
   },
   data: function () {

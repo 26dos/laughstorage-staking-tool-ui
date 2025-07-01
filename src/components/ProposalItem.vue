@@ -1,7 +1,7 @@
 <template>
   <q-item class="p-2" clickable :active="active">
     <q-item-section avatar class="!pr-2 ">
-      <div :class="` ${proposal.bg_color} proposal-item-avatar`">
+      <div :class="` ${proposal.bg_color} proposal-item-avatar uppercase`">
         {{ proposal.p_name[0] }}
         <span class="text-xs font-bold">
           {{ proposal.request_data_cap }}

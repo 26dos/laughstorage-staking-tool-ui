@@ -9,15 +9,14 @@
         <p v-html="proposal.reason_rejection"></p>
       </template>
     </q-timeline-entry>
-    <q-timeline-entry v-if="!['submit', 'draft', 'reject'].includes(proposal.status)" subtitle="Staking"
-      :icon="emptyString(proposal.staking_time) ? 'pending_actions' : 'check_circle'"
-      :color="emptyString(proposal.staking_time) ? 'primary' : 'positive'"
-      :title="emptyString(proposal.staking_time) ? 'Waiting staking' : 'Staked'">
-      <p>
-        Approve to get <span class="font-bold text-primary">{{ proposal.data_cap }}</span> DC quota,
-        pledge <span class="font-bold text-red-500">{{ formatEther(proposal.staking_amount) }} FIL</span>
-      </p>
-    </q-timeline-entry>
+    <template v-if="proposal.plans && proposal.plans.length > 0">
+      <q-timeline-entry v-for="(plan, index) in proposal.plans" :key="index" :title="`Staking Plan ${index + 1}`"
+        :subtitle="formatDateTime(plan.created_at)"
+        :icon="plan.status === 'success' ? 'check_circle' : 'pending_actions'"
+        :color="plan.status === 'success' ? 'positive' : 'grey'">
+        <p> Stake {{ plan.staking_amount }} tokens and get {{ plan.data_cap }} tib DataCap</p>
+      </q-timeline-entry>
+    </template>
   </q-timeline>
 </template>
 <script>

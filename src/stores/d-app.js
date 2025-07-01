@@ -13,6 +13,7 @@ export const useDAppStore = defineStore('dApp', {
     isLogin: false,
     userInfo: {
       wallet: undefined,
+      role: undefined,
     },
   }),
 

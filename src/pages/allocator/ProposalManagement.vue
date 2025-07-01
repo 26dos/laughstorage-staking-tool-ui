@@ -16,22 +16,15 @@
           <q-badge :color="props.row.kyc_status === 'verified' ? 'green' : 'red'">{{ props.row.kyc_status }}</q-badge>
         </q-td>
       </template>
-      <template v-slot:body-cell-staking="props">
+      <!-- staking_plan -->
+      <template v-slot:body-cell-staking_plan="props">
         <q-td :props="props">
-          <q-badge dense v-if="props.row.status === 'submit'" color="grey">
-            Waiting f
-            or review
-          </q-badge>
-          <q-badge dense v-if="props.row.status === 'draft'" color="red">
-            Not Submitted
-          </q-badge>
-          <template v-if="!['submit', 'draft'].includes(props.row.status)">
-            <q-chip square dense icon="pending_actions" v-if="emptyString(props.row.staking_time)" color="primary">
-              {{ formatEther(props.row.staking_amount) }} FIL
-            </q-chip>
-            <q-chip square dense icon="check_circle" v-else color="green">
-              Staked {{ formatEther(props.row.staking_amount) }} FIL
-            </q-chip>
+          <template v-if="!props.row.plans">
+            <q-badge dense color="grey" label="No Plan"></q-badge>
+          </template>
+          <template v-else>
+            <q-btn padding="5px 10px" dense icon="visibility" outline :label="`View ${props.row.plans.length} Plan`"
+              rounded unelevated color="primary" @click="viewPlan(props.row)" />
           </template>
         </q-td>
       </template>
@@ -44,12 +37,23 @@
       </template>
       <template v-slot:body-cell-action="props">
         <q-td :props="props" class="space-x-2">
-          <q-btn rounded unelevated color="primary" label="View" @click="viewProposal(props.row)" />
-          <q-btn :disable="props.row.status !== 'submit' || props.row.kyc_status !== 'verified'" rounded unelevated
-            color="negative" label="Audit" @click="openAuditDialog(props.row)" />
+          <template v-if="dAppStore.userInfo.role === 'admin'">
+            <template v-if="props.row.status === 'success'">
+              <q-btn padding="5px 10px" dense icon="add_circle" label="Create Plan" rounded unelevated color="primary"
+                @click="openCreatePlanDialog(props.row)" />
+            </template>
+            <template v-else>
+              <q-btn padding="5px 10px" dense icon="admin_panel_settings"
+                :disable="props.row.status !== 'submit' || props.row.kyc_status !== 'verified'" rounded unelevated
+                color="negative" label="Audit" @click="openAuditDialog(props.row)" />
+            </template>
+          </template>
+          <q-btn padding="5px 10px" dense rounded unelevated outline icon="visibility" color="primary" label="View"
+            @click="viewProposal(props.row)" />
         </q-td>
       </template>
     </q-table>
+    <!-- view dialog -->
     <q-dialog v-model="viewDialog" full-width persistent>
       <div>
         <q-card class="container">
@@ -59,10 +63,11 @@
               <q-btn icon="close" outline round v-close-popup />
             </div>
           </q-card-section>
-          <proposal-view :proposal="selectedProposal" />
+          <proposal-view :proposal="selectedProposal" :hideComments="true" />
         </q-card>
       </div>
     </q-dialog>
+    <!-- audit dialog -->
     <q-dialog v-model="auditDialog" persistent>
       <q-card class="main-card lg:w-[400px]">
         <q-card-section class="bg-primary text-white flex items-center justify-between">
@@ -78,10 +83,6 @@
             <q-form class="space-y-2" @submit="handleAudit">
               <q-input :rules="[(val) => !emptyString(val) || 'Please enter a value']" label="Approved DataCap Share"
                 outlined v-model="auditForm.data_cap"></q-input>
-              <q-input disable :rules="[(val) => !emptyString(val) || 'Please enter a value']"
-                label="Required collateral amount FIL" outlined v-model="auditForm.amount"></q-input>
-              <q-select map-options emit-value :options="stakeDaysOptions" label="Pledge Type" outlined
-                v-model="auditForm.stake_days"></q-select>
               <div class="!mt-5">
                 <q-btn class="w-full" rounded unelevated size="lg" label="Submit" color="primary" type="submit" />
               </div>
@@ -102,16 +103,81 @@
         </q-inner-loading>
       </q-card>
     </q-dialog>
+    <!-- create plan dialog -->
+    <q-dialog v-model="createPlanDialog" persistent>
+      <q-card class="main-card lg:w-[400px]">
+        <q-card-section class="bg-primary text-white flex items-center justify-between">
+          <div class="text-4xl font-bold">Create Plan</div>
+          <q-btn icon="close" outline round v-close-popup />
+        </q-card-section>
+        <q-card-section>
+          <q-form class="space-y-2" @submit="handleCreatePlan">
+            <div class="flex items-center space-x-2">
+              <q-input :rules="[(val) => !emptyString(val) || 'Please enter a value']" class="flex-1" outlined
+                v-model="planForm.data_cap" label="Data Cap" />
+              <q-select :rules="[(val) => !emptyString(val) || 'Please enter a value']" class="w-[120px]" outlined
+                v-model="planForm.cap_unit" :options="constDataCapUnit" label="Unit" />
+            </div>
+            <q-input :rules="[(val) => !emptyString(val) || 'Please enter a value']" disable outlined
+              v-model="planForm.amount" label="Staking Amount">
+              <template v-slot:append>
+                <q-img src="/tokens/filecoin.png" width="20px" height="20px" />
+              </template>
+            </q-input>
+            <q-select outlined v-model="planForm.stake_days" emit-value map-options :options="constStakeDaysOptions"
+              label="Staking Days" />
+            <div class="!mt-5">
+              <q-btn class="w-full" rounded unelevated size="lg" label="Submit" type="submit" color="primary" />
+            </div>
+            <q-inner-loading color="primary" :showing="createPlanLoading">
+              <q-spinner-hourglass class="mx-auto" color="primary" size="3em" />
+            </q-inner-loading>
+          </q-form>
+        </q-card-section>
+      </q-card>
+    </q-dialog>
+    <!-- view plan dialog -->
+    <q-dialog v-model="viewPlanDialog" persistent>
+      <q-card class="main-card lg:w-[400px]">
+        <q-card-section class="bg-primary text-white flex items-center justify-between">
+          <div class="text-4xl font-bold">View Plan</div>
+          <q-btn icon="close" outline round v-close-popup />
+        </q-card-section>
+        <q-list separator>
+          <q-item class="py-4" v-for="(plan, index) in selectedProposal.plans" :key="index">
+            <q-item-section avatar>
+              <q-icon size="2.5em" name="check_circle" color="green" v-if="plan.status === 'success'" />
+              <q-icon size="2.5em" name="pending_actions" color="grey" v-else-if="plan.status === 'pending'" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label class="font-bold">
+                Stake {{ plan.staking_amount }} tokens and get {{ plan.data_cap }} tib DataCap
+              </q-item-label>
+              <q-item-label caption>
+                Created on {{ formatDateTime(plan.created_at) }},
+                <template v-if="plan.status === 'pending'">
+                  not pledged yet
+                </template>
+                <template v-else>
+                  pledged on {{ formatDateTime(plan.staking_time) }}
+                </template>
+              </q-item-label>
+            </q-item-section>
+          </q-item>
+        </q-list>
+      </q-card>
+    </q-dialog>
   </q-page>
 </template>
 <script>
-import { defineComponent } from 'vue';
+import { defineComponent, ref } from 'vue';
 import { proposalApi } from 'src/dist/api';
 import AddressImg from 'src/components/AddressImg.vue';
-import { customAlert, emptyString, handleAddress, toDataCapTB } from 'src/dist/tools';
-import { constStatusConfig } from 'src/dist/const-data';
+import { customAlert, emptyString, handleAddress, toDataCapTB, formatDateTime } from 'src/dist/tools';
+import { constStatusConfig, constDataCapUnit, constStakeDaysOptions } from 'src/dist/const-data';
 import ProposalView from 'src/components/ProposalView.vue';
 import { formatEther } from 'ethers';
+import { useDAppStore } from 'src/stores/d-app';
 export default defineComponent({
   name: 'ProposalManagement',
   components: {
@@ -122,24 +188,15 @@ export default defineComponent({
     return {
       loading: false,
       constStatusConfig,
+      constDataCapUnit,
       auditTab: 'approve',
       viewDialog: false,
       auditDialog: false,
       auditForm: {
         data_cap: null,
-        amount: null,
-        stake_days: undefined,
       },
-      stakeDaysOptions: [
-        {
-          label: 'Public datasets',
-          value: 20,
-        },
-        {
-          label: 'Private datasets',
-          value: 40,
-        },
-      ],
+      viewPlanDialog: false,
+      constStakeDaysOptions,
       columns: [
         {
           name: 'p_name',
@@ -164,9 +221,9 @@ export default defineComponent({
           align: 'left',
           name: 'kyc_status',
         }, {
-          label: 'Staking',
+          label: 'Staking Plan',
           align: 'left',
-          name: 'staking',
+          name: 'staking_plan',
         }, {
           label: 'Status',
           align: 'left',
@@ -184,6 +241,15 @@ export default defineComponent({
       },
       selectedProposal: null,
       auditLoading: false,
+      createPlanDialog: false,
+      planForm: {
+        data_cap: null,
+        amount: null,
+        stake_days: undefined,
+        cap_unit: undefined,
+        set_cap: null,
+      },
+      createPlanLoading: false,
     }
   },
   watch: {
@@ -193,21 +259,49 @@ export default defineComponent({
       },
       immediate: true,
     },
-    'auditForm.data_cap': {
+    'planForm.data_cap': {
+      handler() {
+        this.inputSetCap()
+      },
+      immediate: true,
+    },
+    'planForm.cap_unit': {
+      handler() {
+        this.inputSetCap()
+      },
+      immediate: true,
+    },
+    'planForm.set_cap': {
       handler(val) {
         if (emptyString(val)) return;
         const tib = parseFloat(toDataCapTB(val))
         // 10TIB= 1FIL
         const requiredFil = (tib / 10).toFixed(2)
-        this.auditForm.amount = requiredFil.toString()
+        this.planForm.amount = requiredFil.toString()
       },
       immediate: true,
     },
+  },
+  setup() {
+    const dAppStore = useDAppStore();
+    return {
+      dAppStore: ref(dAppStore),
+    }
   },
   methods: {
     handleAddress,
     emptyString,
     formatEther,
+    formatDateTime,
+    inputSetCap() {
+      const { data_cap, cap_unit } = this.planForm
+      if (emptyString(data_cap) || emptyString(cap_unit)) return;
+      this.planForm.set_cap = `${data_cap} ${cap_unit}`;
+    },
+    openCreatePlanDialog(proposal) {
+      this.selectedProposal = proposal;
+      this.createPlanDialog = true;
+    },
     getProposals() {
       this.loading = true;
       proposalApi.proposals().then((response) => {
@@ -237,6 +331,18 @@ export default defineComponent({
         this.auditLoading = false;
       })
     },
+    handleCreatePlan() {
+      this.createPlanLoading = true;
+      proposalApi.createPlan(this.selectedProposal.p_id, this.planForm).then((res) => {
+        this.updateProposal(res.data)
+        customAlert.success('Create plan successful');
+        this.createPlanDialog = false;
+      }).catch((error) => {
+        customAlert.error(error.message);
+      }).finally(() => {
+        this.createPlanLoading = false;
+      })
+    },
     updateProposal(proposal) {
       const rows = this.rows
       const index = rows.findIndex((row) => row.p_id === proposal.p_id)
@@ -254,7 +360,11 @@ export default defineComponent({
       }).finally(() => {
         this.auditLoading = false;
       })
-    }
+    },
+    viewPlan(proposal) {
+      this.selectedProposal = proposal;
+      this.viewPlanDialog = true;
+    },
   }
 });
 </script>

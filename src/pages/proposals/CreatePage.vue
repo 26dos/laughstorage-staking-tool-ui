@@ -46,7 +46,10 @@
                 </q-card-section>
               </q-card>
             </template>
-            <q-card class="main-card" :class="{ 'bg-green-500 text-white': saveProposal.status == 'submit' }">
+            <q-card class="main-card font-bold" :class="{
+              'bg-blue-500 text-white': saveProposal.status == 'submit',
+              'bg-green-500 text-white': saveProposal.status == 'success',
+            }">
               <q-card-section>
                 <template v-if="['draft', 'reject'].includes(saveProposal.status)">
                   <div class="flex items-center justify-center space-x-5">
@@ -57,10 +60,20 @@
                 <template v-if="saveProposal.status == 'submit'">
                   <div class="flex items-center space-x-5">
                     <q-icon name="check_circle" size="2em" color="white" />
-                    <p class="text-lg font-bold">
+                    <p>
                       The current proposal has been submitted, please wait for our team to review!
-                      <q-btn label="View Detail" outline rounded text-color="white" :to="{ name: 'PledgeRecord' }" />
                     </p>
+                    <q-btn label="View Detail" outline rounded text-color="white" :to="{ name: 'PledgeRecord' }" />
+                  </div>
+                </template>
+                <template v-if="saveProposal.status == 'success'">
+                  <div class="flex items-center space-x-5 flex-nowrap">
+                    <q-icon name="check_circle" size="2em" color="white" />
+                    <p class="flex-1">
+                      The proposal has been passed, please pay attention to the pledge plan. DataCap shares will only be
+                      issued when the pledge plan appears and the pledge is successful!
+                    </p>
+                    <q-btn label="View Detail" outline rounded text-color="white" :to="{ name: 'PledgeRecord' }" />
                   </div>
                 </template>
                 <p v-if="error" class=" text-red-500 text-center text-xs mt-2">{{ error }}</p>

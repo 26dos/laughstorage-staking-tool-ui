@@ -10,50 +10,52 @@
           <q-list separator>
             <q-item>
               <q-item-section side>
-                <q-item-label>
+                <q-item-label class="w-[130px]">
                   Approved DC quota
                 </q-item-label>
               </q-item-section>
               <q-item-section>
                 <q-item-label class="font-bold">
-                  {{ proposal.data_cap }}
+                  {{ plan.data_cap }} TiB
                 </q-item-label>
               </q-item-section>
             </q-item>
             <q-item>
               <q-item-section side>
-                <q-item-label>
+                <q-item-label class="w-[130px]">
                   File coin Amount
                 </q-item-label>
               </q-item-section>
               <q-item-section>
                 <q-item-label class="font-bold">
-                  {{ formatEther(proposal.staking_amount) }} FIL
+                  {{ plan.staking_amount }} FIL
                 </q-item-label>
               </q-item-section>
             </q-item>
             <q-item>
               <q-item-section side>
-                <q-item-label>
+                <q-item-label class="w-[130px]">
                   Pledge Type
                 </q-item-label>
               </q-item-section>
               <q-item-section>
                 <q-item-label class="font-bold">
-                  {{ proposal.stake_days === 20 ? 'Public datasets' : 'Private datasets' }}
-                  ({{ proposal.stake_days }} Days)
+                  {{ plan.staking_days === 20 ? 'Public datasets' : 'Private datasets' }}
+                  ({{ plan.staking_days }} Days)
                 </q-item-label>
               </q-item-section>
             </q-item>
           </q-list>
-          <div class="mt-10">
-            <WriteContract size="lg">
-              <template #write-main="{ props }">
-                <q-btn rounded no-caps size="lg" push class="w-full"
-                  :label="`Stake ${formatEther(proposal.staking_amount)} FIL`" color="primary"
-                  @click="write(props)"></q-btn>
-              </template>
-            </WriteContract>
+          <div class="mt-5">
+            <div class="flex items-center justify-between space-x-3">
+              <q-btn color="red" icon="close" outline round v-close-popup />
+              <WriteContract size="lg" box-class="flex-1">
+                <template #write-main="{ props }">
+                  <q-btn class="w-full" rounded no-caps size="lg" push :label="`Stake ${plan.staking_amount} FIL`"
+                    color="primary" @click="write(props)"></q-btn>
+                </template>
+              </WriteContract>
+            </div>
           </div>
           <p v-if="!emptyString(error)" class="text-red-500 text-center mt-2">{{ error }}</p>
         </q-form>
@@ -63,7 +65,7 @@
 </template>
 
 <script>
-import { emptyString, toDataCapTB } from 'src/dist/tools';
+import { emptyString } from 'src/dist/tools';
 import { defineComponent } from 'vue';
 import WriteContract from 'src/components/WriteContract.vue'
 import { stakingContractAddress, stakingContractAbi } from 'src/dist/staking-abi';
@@ -78,7 +80,7 @@ export default defineComponent({
       dcAmount: undefined,
       error: undefined,
       dialog: false,
-
+      plan: null,
     }
   },
   props: {
@@ -86,18 +88,24 @@ export default defineComponent({
       type: Object,
       default: null,
     },
+    reloadData: {
+      type: Function,
+      default: null,
+    }
   },
   methods: {
     emptyString,
     formatEther,
     parseEther,
-    openStakingDialog() {
+    openStakingDialog(plan) {
+      this.plan = plan;
       this.dialog = true;
     },
     write: function (props) {
-      const dcAmountTb = toDataCapTB(this.proposal.data_cap);
-      const stakeType = this.proposal.stake_days == 20 ? 0 : 1;
-      const tokenAmountWei = this.proposal.staking_amount;
+      const { data_cap, staking_amount, staking_days } = this.plan;
+      const dcAmountTb = data_cap;
+      const stakeType = staking_days == 20 ? 0 : 1;
+      const tokenAmountWei = parseEther(staking_amount);
       console.log(dcAmountTb, stakeType, tokenAmountWei);
       props.write({
         address: stakingContractAddress,
@@ -105,6 +113,9 @@ export default defineComponent({
         value: tokenAmountWei,
         action: 'stake',
         args: [dcAmountTb, stakeType],
+        successCallback: () => {
+          this.reloadData();
+        }
       })
     },
   }

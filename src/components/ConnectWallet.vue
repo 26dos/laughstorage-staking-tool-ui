@@ -87,6 +87,7 @@ export default defineComponent({
   methods: {
     handleAddress,
     openConnect: function () {
+      this.loading = true;
       this.open({
         view: 'Connect'
       })

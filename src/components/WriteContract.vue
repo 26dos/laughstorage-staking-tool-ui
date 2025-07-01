@@ -1,7 +1,7 @@
 <template>
   <ConnectWallet :size="size">
     <template #connected>
-      <div class="relative">
+      <div class="relative" :class="boxClass">
         <slot name="write-main" :props="{
           write: writeContract,
           writeBefore: writeBefore,
@@ -63,6 +63,10 @@ export default defineComponent({
     alertErr: {
       type: Boolean,
       default: false
+    },
+    boxClass: {
+      type: String,
+      default: ''
     }
   },
   data: function () {
@@ -71,12 +75,12 @@ export default defineComponent({
       isConfirmed: false,
       hash: null,
       error: null,
-      loading: false
+      loading: false,
     }
   },
   methods: {
     handleAddress,
-    writeContract: async function ({ address, abi, value, action, args, gasLimit }) {
+    writeContract: async function ({ address, abi, value, action, args, gasLimit, successCallback }) {
       this.writeBefore()
       try {
         this.writeLoading(true)
@@ -100,7 +104,7 @@ export default defineComponent({
         this.hash = tx.hash;
         this.startWaiting();
         await etherProvider.waitForTransaction(tx.hash, 1);
-        this.writeSuccess()
+        this.writeSuccess(successCallback)
       } catch (error) {
         let errMsg = await handleEthErr(error);
         const vmErrorMatch = /vm error=\[Error\((.*?)\)\]/.exec(errMsg)
@@ -156,8 +160,11 @@ export default defineComponent({
         }
       })
     },
-    writeSuccess: function () {
+    writeSuccess: function (successCallback) {
       this.isConfirmed = true;
+      if (successCallback) {
+        successCallback();
+      }
     },
     openTx: function () {
       window.open(`${viewLink.tx}/${this.hash}`, '_blank');

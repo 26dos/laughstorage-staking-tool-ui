@@ -23,4 +23,12 @@ export const constStatusConfig = {
   waiting_staking: { color: 'blue', label: 'Waiting staking', icon: 'pending_actions' },
   waiting_allocation: { color: 'blue', label: 'Waiting allocation', icon: 'pending_actions' },
   reject: { color: 'warning', label: 'Rejected', icon: 'close' },
+  success: { color: 'positive', label: 'Success', icon: 'check_circle' },
 }
+
+export const constDataCapUnit = ['TiB', 'PiB', 'GiB']
+
+export const constStakeDaysOptions = [
+  { label: 'Public datasets', value: 20 },
+  { label: 'Private datasets', value: 40 },
+]
