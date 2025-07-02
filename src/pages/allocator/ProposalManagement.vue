@@ -145,23 +145,34 @@
         </q-card-section>
         <q-list separator>
           <q-item class="py-4" v-for="(plan, index) in selectedProposal.plans" :key="index">
-            <q-item-section avatar>
-              <q-icon size="2.5em" name="check_circle" color="green" v-if="plan.status === 'success'" />
-              <q-icon size="2.5em" name="pending_actions" color="grey" v-else-if="plan.status === 'pending'" />
+            <q-item-section avatar class="!min-w-[auto]">
+              <q-icon size="2em" name="check_circle" color="green" v-if="plan.status === 'success'" />
+              <q-icon size="2em" name="pending_actions" color="grey" v-else-if="plan.status === 'pending'" />
+              <q-icon size="2em" name="incomplete_circle" color="primary"
+                v-else-if="plan.status === 'waiting_allocation'" />
             </q-item-section>
             <q-item-section>
-              <q-item-label class="font-bold">
-                Stake {{ plan.staking_amount }} tokens and get {{ plan.data_cap }} tib DataCap
+              <q-item-label class="font-bold text-lg">
+                Stake {{ plan.staking_amount }} tokens to receive {{ plan.data_cap }} TiB DataCap
               </q-item-label>
-              <q-item-label caption>
-                Created on {{ formatDateTime(plan.created_at) }},
+              <q-item-label caption class="text-sm !leading-snug">
+                Created on {{ formatDateTime(plan.created_at, 'MMMM D, YYYY h:mm A') }},
                 <template v-if="plan.status === 'pending'">
-                  not pledged yet
+                  not staked yet
                 </template>
-                <template v-else>
-                  pledged on {{ formatDateTime(plan.staking_time) }}
-                </template>
+                <span class="text-positive font-bold" v-else>
+                  staked on {{ formatDateTime(plan.staking_time, 'MMMM D, YYYY h:mm A') }}
+                </span>
+                <span class="text-negative font-bold" v-if="plan.status === 'waiting_allocation'">
+                  DataCap allocation in progress...
+                </span>
+                <span class="text-positive font-bold" v-if="plan.status === 'success'">
+                  DataCap allocated on {{ formatDateTime(plan.allocate_time, 'MMMM D, YYYY h:mm A') }}
+                </span>
               </q-item-label>
+            </q-item-section>
+            <q-item-section side v-if="plan.status === 'pending'">
+              <q-btn @click="openStakingDialog(plan)" unelevated label="Stake" rounded color="primary" />
             </q-item-section>
           </q-item>
         </q-list>
