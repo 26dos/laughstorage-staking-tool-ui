@@ -1,4 +1,4 @@
-import { filecoinCalibration } from '@reown/appkit/networks'
+import { filecoin } from '@reown/appkit/networks'
 
 export const dAppMetaData = {
   appName: 'Laughstorage staking tool',
@@ -9,10 +9,10 @@ export const dAppMetaData = {
 
 export const dAppProjectId = '0c6c2bb6a4b6e903a6e679ab3b75709a'
 
-export const networks = [filecoinCalibration]
+export const networks = [filecoin]
 
 export const viewLink = {
-  tx: 'https://calibration.filfox.info/message',
+  tx: 'https://filfox.info/zh/message/',
 }
 
 export const constStatusConfig = {

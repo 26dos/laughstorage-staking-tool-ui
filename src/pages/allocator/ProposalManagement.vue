@@ -160,19 +160,18 @@
                 <template v-if="plan.status === 'pending'">
                   not staked yet
                 </template>
-                <span class="text-positive font-bold" v-else>
+                <span class="text-positive" v-else>
                   staked on {{ formatDateTime(plan.staking_time, 'MMMM D, YYYY h:mm A') }}
                 </span>
-                <span class="text-negative font-bold" v-if="plan.status === 'waiting_allocation'">
+                <span class="text-negative" v-if="plan.status === 'waiting_allocation'">
                   DataCap allocation in progress...
                 </span>
-                <span class="text-positive font-bold" v-if="plan.status === 'success'">
+                <span class="text-positive" v-if="plan.status === 'success'">
                   DataCap allocated on {{ formatDateTime(plan.allocate_time, 'MMMM D, YYYY h:mm A') }}
+                  <a class="text-blue-500 underline" v-if="plan.status === 'success'"
+                    :href="`${viewLink.tx}${plan.allocate_tx}`" target="_blank">View Transaction</a>
                 </span>
               </q-item-label>
-            </q-item-section>
-            <q-item-section side v-if="plan.status === 'pending'">
-              <q-btn @click="openStakingDialog(plan)" unelevated label="Stake" rounded color="primary" />
             </q-item-section>
           </q-item>
         </q-list>
@@ -185,7 +184,7 @@ import { defineComponent, ref } from 'vue';
 import { proposalApi } from 'src/dist/api';
 import AddressImg from 'src/components/AddressImg.vue';
 import { customAlert, emptyString, handleAddress, toDataCapTB, formatDateTime } from 'src/dist/tools';
-import { constStatusConfig, constDataCapUnit, constStakeDaysOptions } from 'src/dist/const-data';
+import { constStatusConfig, constDataCapUnit, constStakeDaysOptions, viewLink } from 'src/dist/const-data';
 import ProposalView from 'src/components/ProposalView.vue';
 import { formatEther } from 'ethers';
 import { useDAppStore } from 'src/stores/d-app';
@@ -198,6 +197,7 @@ export default defineComponent({
   data() {
     return {
       loading: false,
+      viewLink,
       constStatusConfig,
       constDataCapUnit,
       auditTab: 'approve',

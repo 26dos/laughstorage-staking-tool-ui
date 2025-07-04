@@ -54,14 +54,16 @@
                         <template v-if="plan.status === 'pending'">
                           not staked yet
                         </template>
-                        <span class="text-positive font-bold" v-else>
+                        <span class="text-positive" v-else>
                           staked on {{ formatDateTime(plan.staking_time, 'MMMM D, YYYY h:mm A') }}
                         </span>
-                        <span class="text-negative font-bold" v-if="plan.status === 'waiting_allocation'">
+                        <span class="text-negative" v-if="plan.status === 'waiting_allocation'">
                           DataCap allocation in progress...
                         </span>
-                        <span class="text-positive font-bold" v-if="plan.status === 'success'">
+                        <span class="text-positive" v-if="plan.status === 'success'">
                           DataCap allocated on {{ formatDateTime(plan.allocate_time, 'MMMM D, YYYY h:mm A') }}
+                          <a class="text-blue-500 underline" v-if="plan.status === 'success'"
+                            :href="`${viewLink.tx}${plan.allocate_tx}`" target="_blank">View Transaction</a>
                         </span>
                       </q-item-label>
                     </q-item-section>
@@ -130,7 +132,7 @@ import { proposalApi } from 'src/dist/api';
 import { useDAppStore } from 'src/stores/d-app';
 import { constProposalForm } from 'src/dist/proposal-form';
 import KYCVerification from 'src/components/KYCVerification.vue';
-import { constStatusConfig } from 'src/dist/const-data';
+import { constStatusConfig, viewLink } from 'src/dist/const-data';
 import StakingCard from 'src/components/StakingCard.vue';
 import { formatDateTime } from 'src/dist/tools';
 export default defineComponent({
@@ -143,6 +145,7 @@ export default defineComponent({
     const dAppStore = useDAppStore();
     return {
       dAppStore,
+      viewLink,
     }
   },
   props: {

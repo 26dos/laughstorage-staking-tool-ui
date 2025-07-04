@@ -40,7 +40,7 @@
               </q-item-section>
               <q-item-section>
                 <q-item-label class="font-bold">
-                  {{ plan.staking_days === 20 ? 'Public datasets' : 'Private datasets' }}
+                  {{constStakeDaysOptions.find(option => option.value === plan.staking_days).label}}
                   ({{ plan.staking_days }} Days)
                 </q-item-label>
               </q-item-section>
@@ -70,6 +70,7 @@ import { defineComponent } from 'vue';
 import WriteContract from 'src/components/WriteContract.vue'
 import { stakingContractAddress, stakingContractAbi } from 'src/dist/staking-abi';
 import { parseEther, formatEther } from 'ethers';
+import { constStakeDaysOptions } from 'src/dist/const-data';
 export default defineComponent({
   name: 'StakingCard',
   components: {
@@ -81,6 +82,7 @@ export default defineComponent({
       error: undefined,
       dialog: false,
       plan: null,
+      constStakeDaysOptions
     }
   },
   props: {
@@ -114,6 +116,7 @@ export default defineComponent({
         action: 'stake',
         args: [dcAmountTb, stakeType],
         successCallback: () => {
+          this.dialog = false;
           this.reloadData();
         }
       })

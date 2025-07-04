@@ -40,6 +40,11 @@ const routes = [
         component: () => import('pages/SocialPage.vue'),
         name: 'SocialPage',
       },
+      {
+        path: 'help',
+        component: () => import('src/pages/HelpPage.vue'),
+        name: 'HelpPage',
+      },
     ],
   },
   {

@@ -18,6 +18,11 @@
                 <q-item-label>Record</q-item-label>
               </q-item-section>
             </q-item>
+            <q-item clickable :to="{ name: 'HelpPage' }">
+              <q-item-section>
+                <q-item-label>FAQ</q-item-label>
+              </q-item-section>
+            </q-item>
           </q-list>
         </div>
         <ConnectWallet ref="connectWalletRef" :is-w-full="false" btn-type="account" />
@@ -42,6 +47,14 @@
           </q-item-section>
           <q-item-section>
             <q-item-label>Record</q-item-label>
+          </q-item-section>
+        </q-item>
+        <q-item class="flex-col items-center justify-center" clickable :to="{ name: 'HelpPage' }">
+          <q-item-section class="!min-w-[auto] !pr-0 mb-1" avatar>
+            <q-icon name="help"></q-icon>
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>FAQ</q-item-label>
           </q-item-section>
         </q-item>
         <q-item class="flex-col items-center justify-center" clickable :to="{ name: 'SocialPage' }">

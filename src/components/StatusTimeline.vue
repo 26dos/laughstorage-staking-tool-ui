@@ -14,7 +14,29 @@
         :subtitle="formatDateTime(plan.created_at)"
         :icon="plan.status === 'success' ? 'check_circle' : 'pending_actions'"
         :color="plan.status === 'success' ? 'positive' : 'grey'">
-        <p> Stake {{ plan.staking_amount }} tokens and get {{ plan.data_cap }} tib DataCap</p>
+        <ol class="list-decimal list-inside">
+          <li>
+            Stake {{ plan.staking_amount }} tokens and get {{ plan.data_cap }} tib DataCap
+          </li>
+          <li>
+            <template v-if="plan.status === 'pending'">
+              not staked yet
+            </template>
+            <template v-else>
+              staked on {{ formatDateTime(plan.staking_time, 'MMMM D, YYYY h:mm A') }}
+            </template>
+          </li>
+          <li>
+            <template v-if="plan.status === 'waiting_allocation'">
+              DataCap allocation in progress...
+            </template>
+            <template v-if="plan.status === 'success'">
+              DataCap allocated on {{ formatDateTime(plan.allocate_time, 'MMMM D, YYYY h:mm A') }}
+            </template>
+            <a class="text-blue-500 underline" v-if="plan.status === 'success'"
+              :href="`${viewLink.tx}${plan.allocate_tx}`" target="_blank">View Transaction</a>
+          </li>
+        </ol>
       </q-timeline-entry>
     </template>
   </q-timeline>
@@ -23,7 +45,7 @@
 import { defineComponent } from 'vue';
 import { formatDateTime, emptyString } from 'src/dist/tools';
 import { formatEther } from 'ethers';
-import { constStatusConfig } from 'src/dist/const-data';
+import { constStatusConfig, viewLink } from 'src/dist/const-data';
 export default defineComponent({
   name: 'StatusTimeline',
   props: {
@@ -38,6 +60,7 @@ export default defineComponent({
   data: function () {
     return {
       constStatusConfig,
+      viewLink,
       status: {
         color: '',
         label: '',

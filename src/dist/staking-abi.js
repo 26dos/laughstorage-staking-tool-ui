@@ -1,4 +1,4 @@
-export const stakingContractAddress = '0x26F8C4C70e2159e4Fe751CF68489bd53Fbac71B3'
+export const stakingContractAddress = '0x5AA7959e43f7BF71C306e58d0887A0B11D9682f7'
 export const stakingContractAbi = [
   {
     anonymous: false,

@@ -294,3 +294,20 @@ div:where(.swal2-icon).swal2-question {
 .reply-content {
   @apply line-clamp-2 flex-1;
 }
+
+/* faq-item */
+.faq-item .q-item__section--main .q-item__label {
+  @apply text-lg;
+}
+
+.faq-item .answer-content {
+  @apply p-5 text-base leading-loose;
+}
+
+.faq-item.q-expansion-item--expanded .faq-header {
+  @apply bg-blue-50 text-blue-500 font-bold;
+}
+
+.faq-item.q-expansion-item--expanded .answer-content {
+  @apply bg-gray-50;
+}
