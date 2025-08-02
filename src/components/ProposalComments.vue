@@ -68,7 +68,7 @@
                   </div>
                 </div>
               </template>
-              <div class="mt-2 text-base leading-snug" v-html="comment.comment_content"></div>
+              <div class="mt-2 text-sm leading-loose" v-html="comment.comment_content"></div>
             </q-item-section>
           </q-item>
         </q-list>
@@ -129,6 +129,11 @@ export default defineComponent({
         this.getComments();
       },
       immediate: true,
+    },
+    page: {
+      handler() {
+        this.getComments();
+      },
     },
   },
   methods: {

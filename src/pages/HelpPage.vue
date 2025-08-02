@@ -31,6 +31,12 @@ export default defineComponent({
     return {
       faqs: [
         {
+          question: `🚨 Do I need to activate my F1 address before submitting the application?`,
+          answer: `Yes. Please make sure the F1 address you provide in your application form is already activated (for example, by transferring a small amount of FIL to it).<br>
+This is necessary because our channel is integrated with a smart contract, and non-activated F1 addresses will fail to trigger the contract, resulting in unsuccessful DataCap allocation.<br>
+To avoid unnecessary delays, please activate your address before submitting your application.`
+        },
+        {
           question: `Who is eligible to apply through this channel?`,
           answer: `<span class="font-bold">Anyone</span> with a real data storage need—whether individuals, teams, or organizations—can apply. We especially welcome research institutions, media companies, and enterprise data units to onboard important data through this channel.`
         }, {

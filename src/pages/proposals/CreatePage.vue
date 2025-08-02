@@ -28,7 +28,8 @@
                         </template>
                       </q-input>
                       <q-select outlined dense v-model="form[field.key]" :label="field.label" :options="field.options"
-                        v-if="field.type == 'select'" :hint="field.hint" :rules="field.rules">
+                        v-if="field.type == 'select'" :hint="field.hint" :rules="field.rules"
+                        :multiple="field.multiple">
                         <template v-slot:prepend v-if="field.required">
                           <span class="text-red-500 text-base">*</span>
                         </template>
@@ -152,7 +153,12 @@ export default defineComponent({
         this.saveProposal = res.data;
         const proposal = JSON.parse(res.data.p_content);
         proposal.forEach(item => {
-          this.form[item.key] = item.value;
+          const value = item.value;
+          if (item.multiple) {
+            this.form[item.key] = value.split(',');
+          } else {
+            this.form[item.key] = value;
+          }
         });
       }).finally(() => {
         this.pageLoading = false
@@ -163,10 +169,18 @@ export default defineComponent({
       this.loading = true
       let data = [];
       for (const key in this.form) {
-        data.push({
-          key,
-          value: this.form[key]
-        })
+        const value = this.form[key];
+        if (Array.isArray(value)) {
+          data.push({
+            key,
+            value: value.join(',')
+          })
+        } else {
+          data.push({
+            key,
+            value: value
+          })
+        }
       }
       if (type !== 'draft') {
         type = 'submit'

@@ -26,14 +26,12 @@
                 </div>
               </div>
             </q-card-section>
-            <q-scroll-area class="lg:h-[500px]">
-              <q-list separator class="proposal-list">
-                <template v-for="proposal in proposals" :key="proposal.p_id">
-                  <ProposalItem :proposal="proposal" :active="selectedProposal.p_id === proposal.p_id"
-                    @click="setSelectedProposal(proposal)" />
-                </template>
-              </q-list>
-            </q-scroll-area>
+            <q-list separator class="proposal-list">
+              <template v-for="proposal in proposals" :key="proposal.p_id">
+                <ProposalItem :proposal="proposal" :active="selectedProposal.p_id === proposal.p_id"
+                  @click="setSelectedProposal(proposal)" />
+              </template>
+            </q-list>
           </q-card>
           <div class="flex-1">
             <ProposalView v-if="selectedProposal !== undefined" :proposal="selectedProposal" />

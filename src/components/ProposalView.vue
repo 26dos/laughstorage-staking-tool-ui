@@ -1,6 +1,6 @@
 <template>
-  <div class="grid grid-cols-12 gap-4 proposal-view">
-    <div class="col-span-9 space-y-5">
+  <div class="flex  gap-4 proposal-view">
+    <div class="flex-1 space-y-5">
       <q-card class="main-card">
         <q-card-section class=" text-primary">
           <div class="flex items-center space-x-2">
@@ -40,7 +40,7 @@
       </q-card>
       <proposal-comments v-if="!hideComments" :p_id="proposal.p_id" :proposal="proposal" />
     </div>
-    <q-card class="main-card col-span-3">
+    <q-card class="main-card w-[350px]">
       <q-card-section class="proposal-timeline">
         <status-timeline :proposal="proposal" />
       </q-card-section>
